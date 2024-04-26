@@ -1,6 +1,6 @@
 # Mars CLI
 
-A command line interface for the Mars program.
+A command line interface for the Mars program, which derived from and credited to [Ore project](https://github.com/HardhatChad/ore-cli).
 
 ## Building
 
