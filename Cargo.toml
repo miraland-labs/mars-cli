@@ -1,6 +1,6 @@
 [package]
 name = "mars-cli"
-version = "0.5.0"
+version = "0.5.1"
 description = "A command line interface for the Mars program."
 license = "Apache-2.0"
 edition = "2021"
