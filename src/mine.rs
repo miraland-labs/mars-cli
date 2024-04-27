@@ -122,7 +122,7 @@ impl Miner {
         loop {
             let bus_id = rng.gen_range(0..BUS_COUNT);
             if let Ok(bus) = self.get_bus(bus_id).await {
-                if bus.rewards.gt(&reward_rate.saturating_mul(20)) {
+                if bus.rewards.ge(&reward_rate.saturating_mul(1)) {
                     return bus;
                 }
             }
