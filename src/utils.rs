@@ -9,7 +9,8 @@ use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_program::{pubkey::Pubkey, sysvar};
 use solana_sdk::clock::Clock;
 use spl_associated_token_account::get_associated_token_address;
-use std::io::BufReader;
+// use std::io::BufReader;
+use std::io::Cursor;
 
 pub async fn get_treasury(client: &RpcClient) -> Treasury {
     let data = client
@@ -41,8 +42,11 @@ pub fn play_sound() {
         Ok((_stream, handle)) => {
             let sink = rodio::Sink::try_new(&handle).unwrap();
 
-            let file = std::fs::File::open("../assets/success.mp3").unwrap();
-            sink.append(rodio::Decoder::new(BufReader::new(file)).unwrap());
+            // let file = std::fs::File::open("../assets/success.mp3").unwrap();
+            // sink.append(rodio::Decoder::new(BufReader::new(file)).unwrap());
+            let bytes = include_bytes!("../assets/success.mp3");
+            let cursor = Cursor::new(bytes);
+            sink.append(rodio::Decoder::new(cursor).unwrap());
             sink.sleep_until_end();
         },
         Err(_) => print!("\x07"),
