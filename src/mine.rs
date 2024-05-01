@@ -3,7 +3,7 @@ use std::{
     sync::{atomic::AtomicBool, Arc, Mutex},
 };
 
-use mars::{self, state::Bus, BUS_ADDRESSES, BUS_COUNT, EPOCH_DURATION};
+use mars::{self, state::Bus, BUS_ADDRESSES, BUS_COUNT, EPOCH_DURATION, ONE_MARS};
 use rand::Rng;
 use solana_program::{keccak::HASH_BYTES, program_memory::sol_memcmp, pubkey::Pubkey};
 use solana_sdk::{
@@ -17,6 +17,8 @@ use crate::{
     utils::{get_clock_account, get_proof, get_treasury, play_sound},
     Miner,
 };
+
+const WARNING_REWARD_RATE: u64 = ONE_MARS.saturating_div(10);
 
 // Odds of being selected to submit a reset tx
 const RESET_ODDS: u64 = 20;
@@ -71,8 +73,13 @@ impl Miner {
                 let clock = get_clock_account(&self.rpc_client).await;
                 let threshold = treasury.last_reset_at.saturating_add(EPOCH_DURATION);
                 if clock.unix_timestamp.ge(&threshold) {
-                    // There are a lot of miners right now, so randomly select into submitting tx
-                    if rng.gen_range(0..RESET_ODDS).eq(&0) {
+                    // If there are a lot of miners, randomly select into submitting tx
+                    let odds = if treasury.reward_rate.ge(&WARNING_REWARD_RATE) {
+                        1
+                    } else {
+                        RESET_ODDS
+                    };
+                    if rng.gen_range(0..odds).eq(&0) {
                         println!("Sending epoch reset transaction...");
                         let cu_limit_ix =
                             ComputeBudgetInstruction::set_compute_unit_limit(CU_LIMIT_RESET);
@@ -122,8 +129,14 @@ impl Miner {
         loop {
             let bus_id = rng.gen_range(0..BUS_COUNT);
             if let Ok(bus) = self.get_bus(bus_id).await {
-                if bus.rewards.gt(&reward_rate.saturating_mul(20)) {
-                    return bus;
+                if reward_rate.lt(&WARNING_REWARD_RATE) {
+                    if bus.rewards.gt(&reward_rate.saturating_mul(20)) {
+                        return bus;
+                    }
+                } else {
+                    if bus.rewards.ge(&reward_rate.saturating_mul(1)) {
+                        return bus;
+                    }
                 }
             }
         }
