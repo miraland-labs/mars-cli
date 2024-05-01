@@ -74,10 +74,10 @@ impl Miner {
                 let threshold = treasury.last_reset_at.saturating_add(EPOCH_DURATION);
                 if clock.unix_timestamp.ge(&threshold) {
                     // If there are a lot of miners, randomly select into submitting tx
-                    let odds = if treasury.reward_rate.ge(&WARNING_REWARD_RATE) {
-                        1
+                    let (odds, skip_confirm) = if treasury.reward_rate.ge(&WARNING_REWARD_RATE) {
+                        (1, false)
                     } else {
-                        RESET_ODDS
+                        (RESET_ODDS, true)
                     };
                     if rng.gen_range(0..odds).eq(&0) {
                         println!("Sending epoch reset transaction...");
@@ -86,7 +86,7 @@ impl Miner {
                         let cu_price_ix =
                             ComputeBudgetInstruction::set_compute_unit_price(self.priority_fee);
                         let reset_ix = mars::instruction::reset(signer.pubkey());
-                        self.send_and_confirm(&[cu_limit_ix, cu_price_ix, reset_ix], false, true)
+                        self.send_and_confirm(&[cu_limit_ix, cu_price_ix, reset_ix], false, skip_confirm)
                             .await
                             .ok();
                     }
