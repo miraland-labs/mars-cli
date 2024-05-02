@@ -154,7 +154,16 @@ impl Miner {
                                                     std::thread::sleep(Duration::from_millis(
                                                         GATEWAY_DELAY,
                                                     ));
-                                                    return Ok(sig);
+                                                    // MI
+                                                    // return Ok(sig);
+                                                    if signature_status.status.is_ok() && signature_status.err.is_none() {
+                                                        return Ok(sig);
+                                                    } else {
+                                                        return Err(ClientError {
+                                                            request: None,
+                                                            kind: ClientErrorKind::Custom("Transaction landed with error".into()),
+                                                        });
+                                                    }
                                                 }
                                             }
                                         } else {

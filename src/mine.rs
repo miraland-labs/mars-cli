@@ -116,14 +116,19 @@ impl Miner {
                         }
                         break;
                     }
-                    Err(_err) => {
+                    Err(err) => {
                         // TODO
+                        // MI
+                        println!("Failure: {:?}", err);
                     }
                 }
             }
         }
     }
 
+    // TODO
+    // In extreme case, all running miners could be stuck in loop and waiting forever
+    // Temp solution: some miner exit (ctrl-c) and start over mining
     async fn find_bus_id(&self, reward_rate: u64) -> Bus {
         let mut rng = rand::thread_rng();
         loop {
