@@ -28,7 +28,7 @@ struct Miner {
     pub keypair_filepath: Option<String>,
     pub priority_fee: u64,
     pub rpc_client: Arc<RpcClient>,
-    pub sound_notification: bool,
+    pub no_sound_notification: bool,
 }
 
 #[derive(Parser, Debug)]
@@ -68,15 +68,15 @@ struct Args {
     )]
     priority_fee: u64,
 
-    /// Mine with sound notification
+    /// Mine with sound notification on/off
     #[arg(
         long,
-        value_name = "SOUND_NOTIFICATION",
-        help = "Sound notification by default",
-        default_value = "true",
+        value_name = "NO_SOUND_NOTIFICATION",
+        help = "Sound notification off by default",
+        default_value = "false",
         global = true
     )]
-	sound_notification: bool,
+	no_sound_notification: bool,
 
     #[command(subcommand)]
     command: Commands,
@@ -209,7 +209,7 @@ async fn main() {
         Arc::new(rpc_client),
         args.priority_fee,
         Some(default_keypair),
-        args.sound_notification,
+        args.no_sound_notification,
     ));
 
     // Execute user command.
@@ -248,12 +248,12 @@ async fn main() {
 }
 
 impl Miner {
-    pub fn new(rpc_client: Arc<RpcClient>, priority_fee: u64, keypair_filepath: Option<String>, sound_notification: bool) -> Self {
+    pub fn new(rpc_client: Arc<RpcClient>, priority_fee: u64, keypair_filepath: Option<String>, no_sound_notification: bool) -> Self {
         Self {
             rpc_client,
             keypair_filepath,
             priority_fee,
-            sound_notification,
+            no_sound_notification,
         }
     }
 

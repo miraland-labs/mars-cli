@@ -111,7 +111,7 @@ impl Miner {
                 {
                     Ok(sig) => {
                         println!("Success: {}", sig);
-                        if self.sound_notification {
+                        if ! self.no_sound_notification {
                             play_sound();
                         }
                         break;
